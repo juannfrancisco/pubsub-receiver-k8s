@@ -1,0 +1,31 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: ms-email # Nombre del deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: ms-email # Match label para agrupar contenedores
+  template:
+    metadata:
+      labels:
+        app: ms-email # Nombre Pod
+    spec:
+      volumes:
+      - name: google-cloud-key
+        secret:
+          secretName: pubsub-key
+      containers:
+      - name: ms-email # Nombre del contenedor
+        image: gcr.io/basket-analytics-232302/ms-email:0.0.1-SNAPSHOT
+        volumeMounts:
+        - name: google-cloud-key
+          mountPath: /var/secrets/google
+        ports:
+        - containerPort: 80
+        env:
+        - name: GOOGLE_CLOUD_PROJECT
+          value: "basket-analytics-232302"
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: "/var/secrets/google/key.json"
